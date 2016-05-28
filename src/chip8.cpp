@@ -1,7 +1,10 @@
 #include "chip8.hpp"
+#include <stdlib.h>
+#include <time.h>
 
 chip8::chip8(char * memory) {
   mem = memory;
+  srand(time(NULL));
 }
 
 chip8::~chip8() {
@@ -136,19 +139,57 @@ void chip8::run_instruction() {
 
     DATA_reg[reg_index] = reg_content_y - reg_content_x;
   }
-  else if((opcode & 0xF00F) == 0x8007) { // SUBN Vx, Vy - Vx = Vx - Vy
-    uint8_t reg_index = (opcode&0x00F0)>>4;
-    uint8_t reg_content_y = DATA_reg[reg_index];
-    reg_index = (opcode&0x0F00)>>8;
+  else if((opcode & 0xF00F) == 0x800E) { // SHR Vx, Vy - Vx = Vx<<1
+    uint8_t reg_index = (opcode&0x0F00)>>8;
     uint8_t reg_content_x = DATA_reg[reg_index];
-    if (reg_content_y > reg_content_x) {
+    if (reg_content_x & 0x01) {
       DATA_reg[15] = 1;
     } else {
       DATA_reg[15] = 0;
     }
 
-    DATA_reg[reg_index] = reg_content_y - reg_content_x;
+    DATA_reg[reg_index] = reg_content_x<<1;
   }
+  else if((opcode & 0xF000) == 0x9000) { // SNE Vx, Vy - Skip next if Vx!=Vy
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    uint8_t reg_content_x = DATA_reg[reg_index];
+    reg_index = (opcode&0x00F0)>>4;
+    uint8_t reg_content_y = DATA_reg[reg_index];
+
+    if(reg_content_x != reg_content_y) {
+      PC_reg += 2;
+    }
+  }
+  else if((opcode & 0xF000) == 0xA000) { // LD I, addr - I = addr
+    I_reg = opcode & 0x0FFF;
+  }
+  else if((opcode & 0xF000) == 0xB000) { // JP V0, addr
+    uint16_t addr = opcode & 0x0FFF;
+    PC_reg = addr + DATA_reg[0];
+  }
+  else if((opcode & 0xF000) == 0xC000) { //RND Vx, byte - set Vx=random AND b
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    DATA_reg[reg_index] = (rand() % 256) & (opcode&0x00FF); 
+  }
+  else if((opcode & 0xF000) == 0xD000) { //DRW Vx, Vy, nibble
+    //TODO: implement Graphics
+  }
+  else if((opcode & 0xF0FF) == 0xE09E) { //SKP Vx - skip if key-input = vX
+    //TODO: implement Input
+  }
+  else if((opcode & 0xF0FF) == 0xE0A1) { //SKNP Vx - skip if key-input != vX
+    //TODO: implement Input
+  }
+  else if((opcode & 0xF0FF) == 0xF007) { // LD Vx, DT - Set vx = delay timer
+    //TODO: implement timer register
+  }
+  else if((opcode & 0xF0FF) == 0xF00A) { // LD Vx, K - wait for key, set in Vx
+    //TODO: implement Input
+  }
+  else if((opcode & 0xF0FF) == 0xF015) { // LD DT, Vx - set delay timer = Vx
+    //TODO: implement timer register
+  }
+  
 }
 
 

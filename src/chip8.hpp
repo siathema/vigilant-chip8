@@ -4,9 +4,12 @@
 
 class chip8 {
 
-  // CHIP8 data registers V0..VF
+  // CHIP8 data registers (V0..VF)
   uint8_t DATA_reg[16];
 
+  // Address register(I)
+  uint16_t I_reg;
+  
   // Stack pointer (SP)
   uint8_t SP_reg;
 
@@ -22,6 +25,8 @@ public:
   void run_instruction();
   void update();
 };
+
+#endif
 
 
 
