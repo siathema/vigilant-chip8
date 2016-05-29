@@ -2,13 +2,13 @@
 #include <fstream>
 #include <iomanip>
 #include <stdint.h>
-#include "chip8.hpp"
+//#include "Chip8.hpp"
 #include "Screen.hpp"
 
 int main(int argc, char ** argv) {
   
   if(argc != 2){
-    std::cout << "usage: disassembler [path to file]" << std::endl;
+    std::cout << "usage: Vigilant-chip8 <Path to file>" << std::endl;
     return 0;
   }
 
@@ -30,6 +30,14 @@ int main(int argc, char ** argv) {
     return -1;
   }
 
-  std::cout << "I'm a CHIP8 emulator!" << std::endl;
+
+  uint8_t hex_char[] = {
+    0xF0, 0x90, 0x90, 0x90, 0xf0
+  };
+  
+  Screen screen = Screen();
+  
+  delete m_buffer;
+  
   return 0;
 }

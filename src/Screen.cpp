@@ -1,7 +1,7 @@
-#include "screen.hpp"
+#include "Screen.hpp"
 
 Screen::Screen() {
-
+  clear_screen();
 }
 
 Screen::~Screen() {
@@ -38,13 +38,12 @@ void Screen::clear_screen() {
 void Screen::show_screen() {
 
   for(int i=0; i < (SCREEN_HEIGHT); i++) {
-
+    
     for(int j=0; j < (SCREEN_WIDTH/8); j++) {
 
-      std::cout << i << ": "<< std::setbase(2) << screen_mem[(i*SCREEN_WIDTH/8)+j];
+      std::cout << screen_mem[(i*SCREEN_WIDTH/8)+j];
 
     }
-    std::cout<<std::endl;
 
   }
 
