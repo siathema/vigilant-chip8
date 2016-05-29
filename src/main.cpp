@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include "chip8.hpp"
+#include "Screen.hpp"
 
 int main(int argc, char ** argv) {
   
