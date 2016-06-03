@@ -289,6 +289,7 @@ void chip8::run_instruction() {
 
       DATA_reg[i] = mem[I_reg+i]; 
     
+    }
   }
 
 
@@ -300,6 +301,7 @@ void chip8::run_instruction() {
   }
   return;
 
+  
 }
 
 

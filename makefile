@@ -18,3 +18,4 @@ $(EXECUTABLE) : $(OBJECTS)
 
 clean:
 	rm src/*.o
+	rm $(EXECUTABLE)
