@@ -35,7 +35,18 @@ int main(int argc, char ** argv) {
     0xF0, 0x90, 0x90, 0x90, 0xf0
   };
   
-  Screen screen = Screen();
+  Screen screen(640, 320);
+
+  for(int i=0; i<5; i++) {
+
+    screen.draw_byte(hex_char[i], 10, i);
+
+  }
+  
+  while(true) {
+    
+    screen.show_screen();
+  }
   
   delete m_buffer;
   

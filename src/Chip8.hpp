@@ -1,7 +1,7 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 #include <stdint.h>
-#include "Screen.hpp"
+//#include "Screen.hpp"
 #include "Chip8_Input.hpp"
 
 class Chip8 {
@@ -31,13 +31,13 @@ class Chip8 {
   double chip_timer;
 
   // Screen
-  Screen screen;
+  // Screen screen;
 
   // Input
   Chip8_Input input;
 
 public:
-  Chip8(char * memory, Screen& r_screen, Chip8_Input& r_input);
+  Chip8(char * memory,/* Screen& r_screen,*/ Chip8_Input& r_input);
   ~Chip8();
   void run_instruction();
   void update();

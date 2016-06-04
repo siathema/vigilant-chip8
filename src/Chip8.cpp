@@ -3,11 +3,11 @@
 #include <time.h>
 
 
-Chip8::Chip8(char * memory, Screen& m_screen, Chip8_Input& m_input) {
+Chip8::Chip8(char * memory,/* Screen& m_screen,*/ Chip8_Input& m_input) {
   mem = memory;
   srand(time(NULL));
   chip_timer = 0.0;
-  screen = m_screen;
+  // screen = m_screen;
   input = m_input;
 }
 

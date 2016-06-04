@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <iostream>
 #include <iomanip>
+#include <SFML/Graphics.hpp>
 
 const int SCREEN_WIDTH = 64;
+
 const int SCREEN_HEIGHT = 32;
 
 class Screen {
@@ -12,17 +14,30 @@ class Screen {
   // Each row is 8 bytes long
   uint8_t screen_mem[((SCREEN_WIDTH/8) * SCREEN_HEIGHT)];
 
+  sf::Uint8* pixels;
+  
+  sf::RenderWindow window;
+
+  sf::Texture image;
+  
+  
 public:
 
-  Screen();
+  Screen(int w, int h);
   
   ~Screen();
 
+  void init();
+  
   void draw_byte(uint8_t d_byte, uint8_t x, uint8_t y);
 
   void clear_screen();
 
+  void render_screen();
+  
   void show_screen();
+
+  
 };
 
 #endif
