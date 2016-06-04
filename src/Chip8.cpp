@@ -2,16 +2,20 @@
 #include <stdlib.h>
 #include <time.h>
 
-chip8::chip8(char * memory) {
+
+Chip8::Chip8(char * memory, Screen& m_screen, Chip8_Input& m_input) {
   mem = memory;
   srand(time(NULL));
+  chip_timer = 0.0;
+  screen = m_screen;
+  input = m_input;
 }
 
-chip8::~chip8() {
+Chip8::~Chip8() {
 
 }
 
-void chip8::run_instruction() {
+void Chip8::run_instruction() {
   uint16_t opcode = mem[PC_reg];
   opcode = opcode<<8 | mem[PC_reg+1];
   uint16_t PC_dest = 0;
@@ -218,7 +222,12 @@ void chip8::run_instruction() {
     //TODO: implement Graphics
   }
   else if((opcode & 0xF0FF) == 0xE09E) { //SKP Vx - skip if key-input = vX
-    //TODO: implement Input
+
+    // Get value stored in Vx
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    if(input.is_key_pressed(DATA_reg[reg_index])) {
+	PC_reg += 2;
+      }
   }
   else if((opcode & 0xF0FF) == 0xE0A1) { //SKNP Vx - skip if key-input != vX
     //TODO: implement Input
@@ -304,7 +313,26 @@ void chip8::run_instruction() {
   
 }
 
+// updates state of Chip8 core
+void Chip8::update() {
+  // Time instruction
+  time_t before = time(NULL);
 
-void chip8::update() {
+  run_instruction();
 
+  time_t after = time(NULL);
+
+  chip_timer += difftime(after, before);
+
+  // if timer is 1/60 of a second then update the sound and timer registers
+  if(chip_timer > (1.0 / 60.0)) {
+    if(TIMER_reg > 0) {
+      TIMER_reg--;
+    }
+    if(SOUND_reg > 0) {
+      SOUND_reg--;
+    }
+    chip_timer = 0.0;
+  }
+  
 }
