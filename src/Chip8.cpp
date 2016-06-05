@@ -1,14 +1,25 @@
 #include "Chip8.hpp"
-#include <stdlib.h>
-#include <time.h>
 
+Chip8::Chip8(char* chip8_program, int program_size): screen(640, 320), input() {
 
-Chip8::Chip8(char * memory,/* Screen& m_screen,*/ Chip8_Input& m_input) {
-  mem = memory;
+  init(chip8_program, program_size);
+
+}
+
+void Chip8::init(char* chip8_program, int program_size) {
+
   srand(time(NULL));
   chip_timer = 0.0;
-  // screen = m_screen;
-  input = m_input;
+  memset(mem, 0x00, MEMORY_SIZE*sizeof(char));
+  memset(DATA_reg, 0x00, 16*sizeof(uint8_t));
+  I_reg = 0x0000;
+  SOUND_reg = TIMER_reg = 0x00;
+  SP_reg = 0x0100;
+  PC_reg = 0x0200;
+  
+  memcpy(mem, hex_sprites, 16*5*sizeof(uint8_t));
+  memcpy(mem+0x0200, chip8_program, program_size*sizeof(char));
+  
 }
 
 Chip8::~Chip8() {
@@ -19,15 +30,22 @@ void Chip8::run_instruction() {
   uint16_t opcode = mem[PC_reg];
   opcode = opcode<<8 | mem[PC_reg+1];
   uint16_t PC_dest = 0;
-  
-  if(opcode == 0x00E0) { // CLS -  clear the display
-    //TODO: implement
+  if((opcode&0xF000)==0x0000 && (opcode!=0x00E0) && (opcode!=0x00EE)) { // SYS addr - jump to subroutine at addr
+
+    SP_reg++;
+    mem[SP_reg] = PC_reg;
+    uint16_t addr = opcode&0x0FFF;
+    PC_dest = addr;
+
+
+  }
+  else if(opcode == 0x00E0) { // CLS -  clear the display
+    screen.clear_screen();
   }
   else if(opcode == 0x00EE) { // RET - Return from subroutine
 
     PC_dest = mem[SP_reg];
     SP_reg--;
-
   }
   else if((opcode & 0xF000) == 0x1000) { // JP addr - Jump to lower 14-bit
 
@@ -219,7 +237,29 @@ void Chip8::run_instruction() {
     
   }
   else if((opcode & 0xF000) == 0xD000) { //DRW Vx, Vy, nibble
-    //TODO: implement Graphics
+    bool is_collision = false;
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    uint8_t reg_value_x = DATA_reg[reg_index];
+    reg_index = (opcode&0x00F0)>>4;
+    uint8_t reg_value_y = DATA_reg[reg_index];
+    uint8_t sprite_index = (opcode&0x000F);
+
+    for(int i=0; i<sprite_index; i++) {
+
+     
+      if(reg_value_y + i >= SCREEN_HEIGHT) {
+	if(screen.draw_byte(mem[I_reg+i], reg_value_x, i)) {
+
+	  is_collision = true;
+	  
+	}
+      }
+      
+      if(screen.draw_byte(mem[I_reg+i], reg_value_x, reg_value_y+i)) {
+	is_collision = true;
+      }
+      
+    }
   }
   else if((opcode & 0xF0FF) == 0xE09E) { //SKP Vx - skip if key-input = vX
 
@@ -230,7 +270,13 @@ void Chip8::run_instruction() {
       }
   }
   else if((opcode & 0xF0FF) == 0xE0A1) { //SKNP Vx - skip if key-input != vX
-    //TODO: implement Input
+
+    //Get value stored in Vx
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    if(!input.is_key_pressed(DATA_reg[reg_index])) {
+      PC_reg += 2;
+    }
+    
   }
   else if((opcode & 0xF0FF) == 0xF007) { // LD Vx, DT - Set vx = delay timer
 
@@ -239,7 +285,14 @@ void Chip8::run_instruction() {
     
   }
   else if((opcode & 0xF0FF) == 0xF00A) { // LD Vx, K - wait for key, set in Vx
-    //TODO: implement Input
+    bool cont = false;
+
+    // Get value stored in Vx
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+
+    while(cont) {
+      cont = input.is_key_pressed(DATA_reg[reg_index]);
+    }
   }
   else if((opcode & 0xF0FF) == 0xF015) { // LD DT, Vx - set delay timer = Vx
 
@@ -261,7 +314,9 @@ void Chip8::run_instruction() {
   }
   else if((opcode & 0xF0FF) == 0xF029) { // LD F, Vx - set I = address of hex-sprit of Vx
 
-    //TODO: implement hex-sprites
+    uint16_t reg_index = (opcode&0x0F00)>>8;
+    uint8_t reg_value = DATA_reg[reg_index];
+    I_reg = mem[reg_value *4];
 
   }
   else if((opcode & 0xF0FF) == 0xF033) { // LD B, Vx store in I, I+1, and I+2 the BCD representation of Vx
@@ -315,13 +370,30 @@ void Chip8::run_instruction() {
 
 // updates state of Chip8 core
 void Chip8::update() {
+
+  sf::Event event;
+
+  while(screen.get_window().pollEvent(event)) {
+
+    if(event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) {
+
+      input.update_keys();
+      
+    }
+    if(event.type == sf::Event::Closed) {
+
+      screen.get_window().close();
+
+    }
+  }
+
   // Time instruction
   time_t before = time(NULL);
-
+  
   run_instruction();
-
+  
   time_t after = time(NULL);
-
+  
   chip_timer += difftime(after, before);
 
   // if timer is 1/60 of a second then update the sound and timer registers
@@ -334,5 +406,7 @@ void Chip8::update() {
     }
     chip_timer = 0.0;
   }
-  
+
+    screen.show_screen();
+    
 }

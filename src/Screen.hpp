@@ -12,7 +12,7 @@ const int SCREEN_HEIGHT = 32;
 class Screen {
   // The screen is a 64 * 32 pixel display with each pixel represented as a bit
   // Each row is 8 bytes long
-  uint8_t screen_mem[((SCREEN_WIDTH/8) * SCREEN_HEIGHT)];
+  bool screen_array[SCREEN_WIDTH*SCREEN_HEIGHT];
 
   sf::Uint8* pixels;
   
@@ -29,10 +29,12 @@ public:
 
   void init();
   
-  void draw_byte(uint8_t d_byte, uint8_t x, uint8_t y);
+  bool draw_byte(uint8_t d_byte, uint8_t x, uint8_t y);
 
   void clear_screen();
 
+  sf::RenderWindow& get_window();
+  
   void render_screen();
   
   void show_screen();

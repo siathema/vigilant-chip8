@@ -2,8 +2,8 @@
 #include <fstream>
 #include <iomanip>
 #include <stdint.h>
-//#include "Chip8.hpp"
-#include "Screen.hpp"
+#include "Chip8.hpp"
+
 
 int main(int argc, char ** argv) {
   
@@ -13,7 +13,6 @@ int main(int argc, char ** argv) {
   }
 
   char * m_pathToFile = argv[1];
-
   std::streampos m_file_size;
   char * m_buffer;
 
@@ -30,22 +29,11 @@ int main(int argc, char ** argv) {
     return -1;
   }
 
-
-  uint8_t hex_char[] = {
-    0xF0, 0x90, 0x90, 0x90, 0xf0
-  };
-  
-  Screen screen(640, 320);
-
-  for(int i=0; i<5; i++) {
-
-    screen.draw_byte(hex_char[i], 10, i);
-
-  }
-  
-  while(true) {
+  Chip8 chip8(m_buffer, m_file_size);
+  while(1) {
     
-    screen.show_screen();
+    chip8.update();
+
   }
   
   delete m_buffer;

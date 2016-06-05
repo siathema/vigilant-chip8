@@ -16,67 +16,70 @@ void Screen::init() {
   image.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-void Screen::draw_byte(uint8_t d_byte, uint8_t x, uint8_t y) {
-  if(x%8 == 0 || x%8 == 8) { // byte aligns with screen_mem
-    
-    screen_mem[(y*SCREEN_WIDTH/8) + x/8] = d_byte;
-    
-  } else { // byte is between screen_mem bytes
+bool Screen::draw_byte(uint8_t d_byte, uint8_t x, uint8_t y) {
 
-    int mem_index = x/8;
-    int bit_index = x%8;
-    uint8_t hi_mask = d_byte>>bit_index;
-    uint8_t lo_mask = d_byte<< (8 - bit_index);
-    screen_mem[(y*SCREEN_WIDTH/8) + mem_index] ^= hi_mask;
-    screen_mem[(y*SCREEN_WIDTH/8) + (mem_index + 1)] ^= lo_mask;
+  bool is_collision = false;
+  
+  for(int i=0; i<8; i++) {
 
+    if(((d_byte<<i)&0x80) == 0x80) {
+      if(x+i > SCREEN_WIDTH) {
+	if(screen_array[(SCREEN_WIDTH*y)+i]) {
+	  
+	  screen_array[(SCREEN_WIDTH*y)+i] = false;
+	  is_collision = true;
+	  
+	} else {
+
+	  screen_array[(SCREEN_WIDTH*y)+i] = true;
+	  is_collision = false;
+
+	}
+      } else if( screen_array[(SCREEN_WIDTH*y)+x+i]) {
+	
+	screen_array[(SCREEN_WIDTH*y)+x+i] = false;
+	is_collision = true;
+
+      } else {
+
+	screen_array[(SCREEN_WIDTH*y)+x+i] = true;
+	is_collision = false;
+	
+      }
+    }
   }
+
+  return is_collision;
+  
 }
+
 
 void Screen::render_screen() {
 
-  for(int i=0; i < ((SCREEN_WIDTH/8)*SCREEN_HEIGHT); i++) {
-
-    if(screen_mem[i] == 0x00) {
-      // screen is empty here, move along
-      continue;
-    } else {
-
-      uint8_t byte = screen_mem[i];
-      for(int j=0; j<8; j++) {
-
-	if((byte<<j & 0x80)== 0x80) {
-	  for(int w=0; w<4; w++) {
-
-	    pixels[(i*8)+(j*4)+w] = 255;
-
-	  }
-	}
-	
+  for(int i=0; i<(SCREEN_WIDTH*SCREEN_HEIGHT); i++) {
+    if(screen_array[i]) {
+      for(int j=0; j<4; j++) {
+	pixels[i*4 + j] = 0xFF;
       }
-
     }
-
   }
-
+  
   image.update(pixels);
   
 }
 
 void Screen::clear_screen() {
 
-  for(int i=0; i < ((SCREEN_WIDTH/8)*SCREEN_HEIGHT); i++) {
+    for(int i=0; i < SCREEN_WIDTH*SCREEN_HEIGHT*4; i++) {
 
-    screen_mem[i] = 0x0000;
-    for(int j=0; j<8*4; j++) {
+    pixels[i] = 0x00;
 
-      pixels[i+j] = 0;
-      
     }
+  for(int i=0; i< (SCREEN_WIDTH)*SCREEN_HEIGHT; i++) {
 
-  }
-  
-  
+    screen_array[i] = false;
+    
+  }  
 }
 
 void Screen::show_screen() {
@@ -93,4 +96,9 @@ void Screen::show_screen() {
   
   window.display();
 
+}
+
+sf::RenderWindow& Screen::get_window() {
+
+  return window;
 }

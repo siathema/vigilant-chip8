@@ -13,7 +13,7 @@ EXECUTABLE=Vigilant-chip8
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE) : $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LIBS)
+	$(CC) -g $(OBJECTS) -o $@ $(LIBS)
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
