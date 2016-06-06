@@ -1,5 +1,6 @@
 #ifndef CHIP8_H
 #define CHIP8_H
+#include <iomanip>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -65,16 +66,10 @@ public:
   Chip8(char * chip8_program, int program_size);
   ~Chip8();
   void init(char* chip8_program, int program_size);
-  void run_instruction();
-  void update();
+  void run_instruction(uint16_t opcode, bool debug=false);
+  void update(bool debug=false);
+  uint16_t get_pc();
   
 };
 
 #endif
-
-
-
-
-
-
-

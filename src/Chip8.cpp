@@ -26,10 +26,11 @@ Chip8::~Chip8() {
 
 }
 
-void Chip8::run_instruction() {
-  uint16_t opcode = mem[PC_reg];
-  opcode = opcode<<8 | mem[PC_reg+1];
+void Chip8::run_instruction(uint16_t opcode, bool debug) {
+ 
   uint16_t PC_dest = 0;
+
+  
   if((opcode&0xF000)==0x0000 && (opcode!=0x00E0) && (opcode!=0x00EE)) { // SYS addr - jump to subroutine at addr
 
     SP_reg++;
@@ -37,21 +38,36 @@ void Chip8::run_instruction() {
     uint16_t addr = opcode&0x0FFF;
     PC_dest = addr;
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<< PC_reg << ": SYS " <<std::setbase(16)<<addr<<std::endl;
+    }
 
   }
   else if(opcode == 0x00E0) { // CLS -  clear the display
     screen.clear_screen();
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<< PC_reg << ": CLS"<<std::endl;
+    }
+    
   }
   else if(opcode == 0x00EE) { // RET - Return from subroutine
 
     PC_dest = mem[SP_reg];
     SP_reg--;
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": RET"<<std::endl;
+    }
   }
   else if((opcode & 0xF000) == 0x1000) { // JP addr - Jump to lower 14-bit
 
     uint16_t addr = opcode&0x0FFF;
     PC_dest = addr;
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": JP "<<std::setbase(16)<<addr<<std::endl;
+    }
   }
   else if((opcode & 0xF000) == 0x2000) { // CALL addr - Call subroutine
 
@@ -59,6 +75,10 @@ void Chip8::run_instruction() {
     mem[SP_reg] = PC_reg;
     uint16_t addr = opcode&0x0FFF;
     PC_dest = addr;
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": CALL "<<std::setbase(16)<<addr<<std::endl;
+    }
 
   }
   else if((opcode & 0xF000) == 0x3000) { // SE Vx, byte - Skip net if Vx=b
@@ -69,6 +89,9 @@ void Chip8::run_instruction() {
     if(reg_content == op_byte) {
       PC_reg += 2;
 
+      if(debug==true) {
+	std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SE "<<reg_index<< ", "<<std::setbase(16)<<op_byte<<std::endl;
+      } 
     }
   }
   else if((opcode & 0xF000) == 0x4000) { // SNE Vx, byte - Skip next if Vx!=b
@@ -80,17 +103,25 @@ void Chip8::run_instruction() {
       PC_reg += 2;
     }
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SNE "<<reg_index<< ", "<<std::setbase(16)<<op_byte<<std::endl;
+    }   
+
   }
   else if((opcode & 0xF000) == 0x5000) { // SE Vx, Vy - Skip next if Vx=Vy
 
-    uint16_t reg_index = (opcode&0x0F00)>>8;
-    uint8_t reg_content_x = DATA_reg[reg_index];
-    reg_index = (opcode&0x00F0)>>4;
-    uint8_t reg_content_y = DATA_reg[reg_index];
+    uint16_t reg_index_x = (opcode&0x0F00)>>8;
+    uint8_t reg_content_x = DATA_reg[reg_index_x];
+    uint16_t reg_index_y = (opcode&0x00F0)>>4;
+    uint8_t reg_content_y = DATA_reg[reg_index_y];
 
     if(reg_content_x == reg_content_y) {
       PC_reg += 2;
     }
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SE "<<reg_index_x<< ", "<<reg_index_y<<std::endl;
+    }   
     
   }
   else if((opcode & 0xF000) == 0x6000) { // LD Vx, byte - Set Vx = byte
@@ -98,6 +129,10 @@ void Chip8::run_instruction() {
     uint16_t reg_index = (opcode&0x0F00)>>8;
     uint8_t byte = opcode&0x00FF;
     DATA_reg[reg_index] = byte;
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<reg_index<< ", "<<std::setbase(16)<<byte<<std::endl;
+    }   
     
   }
   else if((opcode & 0xF000) == 0x7000) { // ADD Vx, byte - Vx = Vx+byte
@@ -105,7 +140,10 @@ void Chip8::run_instruction() {
     uint16_t reg_index = (opcode&0x0F00)>>8;
     uint8_t byte = opcode&0x00FF;
     DATA_reg[reg_index] = DATA_reg[reg_index] + byte;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": ADD "<<reg_index<< ", "<<std::setbase(16)<<byte<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8000) { // LD Vx, Vy - Set Vx=Vy
 
@@ -113,6 +151,10 @@ void Chip8::run_instruction() {
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = reg_content_y;
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<reg_index<< ", "<<((opcode&0x0F00)>>4)<<std::endl;
+    }   
     
   }
   else if((opcode & 0xF00F) == 0x8001) { // OR Vx, Vy - Set Vx= Vx OR Vy
@@ -121,7 +163,10 @@ void Chip8::run_instruction() {
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = DATA_reg[reg_index] | reg_content_y;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": OR "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8002) { // AND Vx, Vy - Set Vx= Vx AND Vy
     
@@ -129,7 +174,10 @@ void Chip8::run_instruction() {
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = DATA_reg[reg_index] & reg_content_y;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": AND "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8003) { // XOR Vx, Vy - Set Vx= Vx XOR Vy
     
@@ -137,6 +185,10 @@ void Chip8::run_instruction() {
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = DATA_reg[reg_index] ^ reg_content_y;
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": XOR "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
     
   }
   else if((opcode & 0xF00F) == 0x8004) { // ADD Vx, Vy - Set Vx= Vx + Vy
@@ -149,7 +201,10 @@ void Chip8::run_instruction() {
       DATA_reg[15] = 1;
     }
     DATA_reg[reg_index] = sum;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": ADD "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8005) { // SUB Vx, Vy - Set Vx= Vx - Vy
     
@@ -164,7 +219,10 @@ void Chip8::run_instruction() {
     }
 
     DATA_reg[reg_index] = reg_content_x - reg_content_y;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SUB "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8006) { // SHR Vx, Vy - Vx>>1
     
@@ -177,7 +235,10 @@ void Chip8::run_instruction() {
     }
 
     DATA_reg[reg_index] = reg_content_x>>1;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SHR "<<reg_index<<", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x8007) { // SUBN Vx, Vy - Vx = Vx - Vy
     
@@ -192,7 +253,10 @@ void Chip8::run_instruction() {
     }
 
     DATA_reg[reg_index] = reg_content_y - reg_content_x;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SUBN "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    }   
   }
   else if((opcode & 0xF00F) == 0x800E) { // SHR Vx, Vy - Vx = Vx<<1
     
@@ -205,7 +269,10 @@ void Chip8::run_instruction() {
     }
 
     DATA_reg[reg_index] = reg_content_x<<1;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SHR "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    } 
   }
   else if((opcode & 0xF000) == 0x9000) { // SNE Vx, Vy - Skip next if Vx!=Vy
     
@@ -217,24 +284,36 @@ void Chip8::run_instruction() {
     if(reg_content_x != reg_content_y) {
       PC_reg += 2;
     }
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SNE "<<reg_index<< ", "<<((opcode&0x00F0)>>4)<<std::endl;
+    } 
   }
   else if((opcode & 0xF000) == 0xA000) { // LD I, addr - I = addr
     
     I_reg = opcode & 0x0FFF;
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<< "I, "<<(opcode&0x0FFF)<<std::endl;
+    } 
   }
   else if((opcode & 0xF000) == 0xB000) { // JP V0, addr
     
     uint16_t addr = opcode & 0x0FFF;
     PC_dest = addr + DATA_reg[0];
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": JP "<< "V0, "<<addr<<std::endl;
+    } 
   }
   else if((opcode & 0xF000) == 0xC000) { //RND Vx, byte - set Vx=random AND b
     
     uint16_t reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = (rand() % 256) & (opcode&0x00FF);
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": RND "<<reg_index<< ", "<<(opcode&0x00FF)<<std::endl;
+    } 
   }
   else if((opcode & 0xF000) == 0xD000) { //DRW Vx, Vy, nibble
     bool is_collision = false;
@@ -260,6 +339,13 @@ void Chip8::run_instruction() {
       }
       
     }
+    if(is_collision) {
+      DATA_reg[0] = 0x01;
+    }
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": DRW "<<((opcode&0x0F00)>>8)<<", "<<reg_index<<", "<<sprite_index<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xE09E) { //SKP Vx - skip if key-input = vX
 
@@ -268,6 +354,10 @@ void Chip8::run_instruction() {
     if(input.is_key_pressed(DATA_reg[reg_index])) {
 	PC_reg += 2;
       }
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SKP "<<((opcode&0x0F00)>>8)<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xE0A1) { //SKNP Vx - skip if key-input != vX
 
@@ -276,13 +366,19 @@ void Chip8::run_instruction() {
     if(!input.is_key_pressed(DATA_reg[reg_index])) {
       PC_reg += 2;
     }
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": SKNP "<<((opcode&0x0F00)>>8)<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF007) { // LD Vx, DT - Set vx = delay timer
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     DATA_reg[reg_index] = TIMER_reg;
     
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<reg_index<<", DT"<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF00A) { // LD Vx, K - wait for key, set in Vx
     bool cont = false;
@@ -293,31 +389,47 @@ void Chip8::run_instruction() {
     while(cont) {
       cont = input.is_key_pressed(DATA_reg[reg_index]);
     }
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<reg_index<<", K"<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF015) { // LD DT, Vx - set delay timer = Vx
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     TIMER_reg = DATA_reg[reg_index];
-    
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<"DT, "<<reg_index<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF018) { // LD ST, VX - set sound timer = Vx
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     SOUND_reg = DATA_reg[reg_index];
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD ST, "<<reg_index<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF01E) { // ADD I, Vx - I = I + Vx
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     I_reg += DATA_reg[reg_index];
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": ADD I, "<<reg_index<<std::endl;
+    } 
   }
-  else if((opcode & 0xF0FF) == 0xF029) { // LD F, Vx - set I = address of hex-sprit of Vx
+  else if((opcode & 0xF0FF) == 0xF029) { // LD F, Vx - set I = address of hex-sprite of Vx
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     uint8_t reg_value = DATA_reg[reg_index];
     I_reg = mem[reg_value *4];
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD F, "<<reg_index<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF033) { // LD B, Vx store in I, I+1, and I+2 the BCD representation of Vx
 
@@ -335,6 +447,9 @@ void Chip8::run_instruction() {
     mem[I_reg + 1] = value_tens;
     mem[I_reg + 2] = reg_value%10;
 
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD B, "<<reg_index<<std::endl;
+    } 
   }
   else if((opcode & 0xF0FF) == 0xF055) { // LD [I], Vx - store [V0..Vx] in memory starting at mem[I]
 
@@ -344,9 +459,12 @@ void Chip8::run_instruction() {
       mem[I_reg+i] = DATA_reg[i];
 
     }
-
+    
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD [I],  "<<reg_index<<std::endl;
+    } 
   }
-  else if((opcode & 0xFF0F) == 0xF065) { // LD Vx, [i] - store the memory starting at I in regs[V0..Vx]
+  else if((opcode & 0xFF0F) == 0xF065) { // LD Vx, [I] - store the memory starting at I in regs[V0..Vx]
 
     uint16_t reg_index = (opcode&0x0F00)>>8;
     for(int i=0; i<=reg_index; i++) {
@@ -354,6 +472,10 @@ void Chip8::run_instruction() {
       DATA_reg[i] = mem[I_reg+i]; 
     
     }
+
+    if(debug==true) {
+      std::cout<<"Location: "<<std::setbase(16)<<PC_reg<<": LD "<<reg_index<<" , [I]"<<std::endl;
+    } 
   }
 
 
@@ -369,7 +491,7 @@ void Chip8::run_instruction() {
 }
 
 // updates state of Chip8 core
-void Chip8::update() {
+void Chip8::update(bool debug) {
 
   sf::Event event;
 
@@ -387,11 +509,17 @@ void Chip8::update() {
     }
   }
 
+  uint16_t opcode = 0x00;
+  opcode = mem[PC_reg];
+  opcode = opcode<<8 | mem[PC_reg+1];
+
+
+  
   // Time instruction
   time_t before = time(NULL);
   
-  run_instruction();
-  
+  run_instruction(opcode, debug);
+
   time_t after = time(NULL);
   
   chip_timer += difftime(after, before);
@@ -409,4 +537,8 @@ void Chip8::update() {
 
     screen.show_screen();
     
+}
+
+uint16_t Chip8::get_pc() {
+  return PC_reg;
 }
