@@ -68,8 +68,14 @@ public:
   void init(char* chip8_program, int program_size);
   void run_instruction(uint16_t opcode, bool debug=false);
   void update(bool debug=false);
-  uint16_t get_pc();
-  
+  uint16_t get_PC();
+  uint8_t get_mem(uint16_t address);
+  uint8_t get_V_regs(int index);
+  uint16_t get_I();
+  uint16_t get_SP();
+  uint8_t get_timer();
+  uint8_t get_sound();
+  void print_state();
 };
 
 #endif

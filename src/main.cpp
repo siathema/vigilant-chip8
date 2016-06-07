@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include "Chip8.hpp"
+#include "debugger/Debugger.hpp"
 
 
 int main(int argc, char ** argv) {
@@ -29,12 +30,11 @@ int main(int argc, char ** argv) {
     return -1;
   }
 
+  
   Chip8 chip8(m_buffer, m_file_size);
-  while(1) {
-    
-    chip8.update();
-
-  }
+  Debugger debugger;
+  
+  debugger.run(chip8);
   
   delete m_buffer;
   
