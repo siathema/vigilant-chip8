@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-std=c++11 -c
+CFLAGS=-std=c++11 -g -c
 LFLAGS=-g -std=c++11
 SOURCES := \
 	src/main.cpp \

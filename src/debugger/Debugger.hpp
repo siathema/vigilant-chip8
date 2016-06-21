@@ -5,27 +5,17 @@
 #include "../Chip8.hpp"
 
 class Debugger {
-
-  enum Command {
-    STEP,
-    EXIT,
-    CONTINUE,
-    NOTHING,
-    INVALID
-  };
+  enum Command { STEP, EXIT, CONTINUE, NOTHING, INVALID };
 
   Command last_command;
-  
+
   void parse_line(Chip8 &cpu);
 
-public:
-
+ public:
   Debugger();
   ~Debugger();
 
-
   void run(Chip8 &cpu);
-  
 };
 
 #endif

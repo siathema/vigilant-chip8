@@ -6,12 +6,9 @@
 const int KEY_NUM = 16;
 
 class Chip8_Input {
-  
   bool keypad[KEY_NUM];
-  
 
-public:
-
+ public:
   Chip8_Input();
 
   ~Chip8_Input();
@@ -21,7 +18,6 @@ public:
   bool is_key_pressed(int key);
 
   void update_keys();
-
 };
 
 #endif

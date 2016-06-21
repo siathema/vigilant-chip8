@@ -1,2 +1,5 @@
-## Ignore emacs backups
-*~
+*.log
+*.rom
+*.asm
+Vigilant-chip8
+*.o

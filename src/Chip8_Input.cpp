@@ -2,30 +2,19 @@
 
 extern const int KEY_NUM;
 
-Chip8_Input::Chip8_Input() {
-  clear_input();
-}
+Chip8_Input::Chip8_Input() { clear_input(); }
 
-Chip8_Input::~Chip8_Input() {
-  
-}
+Chip8_Input::~Chip8_Input() {}
 
 void Chip8_Input::clear_input() {
-
-  for(int i=0; i < KEY_NUM; i++) {
+  for (int i = 0; i < KEY_NUM; i++) {
     keypad[i] = false;
   }
 }
 
-bool Chip8_Input::is_key_pressed(int key) {
-
-  return keypad[key];
-  
-}
+bool Chip8_Input::is_key_pressed(int key) { return keypad[key]; }
 
 void Chip8_Input::update_keys() {
-
-
   keypad[1] = sf::Keyboard::isKeyPressed(sf::Keyboard::Num1);
   keypad[2] = sf::Keyboard::isKeyPressed(sf::Keyboard::Num2);
   keypad[3] = sf::Keyboard::isKeyPressed(sf::Keyboard::Num3);
@@ -42,5 +31,4 @@ void Chip8_Input::update_keys() {
   keypad[13] = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
   keypad[14] = sf::Keyboard::isKeyPressed(sf::Keyboard::F);
   keypad[15] = sf::Keyboard::isKeyPressed(sf::Keyboard::V);
-
 }
