@@ -3,3 +3,4 @@
 *.asm
 Vigilant-chip8
 *.o
+*.gch
