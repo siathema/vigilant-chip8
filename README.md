@@ -10,8 +10,8 @@ Simple chip8 emulator in c++
 ./Vigilant-chip8 --debugger [path to chip8 program]
 
 ## Cool pictures
-![Preview](http://imgur.com/qv9BhMa "Space Invaders!")
-![Preview](http://imgur.com/l9u89xx "C8")
+![Preview](http://i.imgur.com/qv9BhMa.png "Space Invaders!")
+![Preview](http://i.imgur.com/l9u89xx.png "C8")
 
 # Dependencies
 * must have sfml 2.3 installed
