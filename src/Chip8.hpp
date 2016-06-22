@@ -30,6 +30,10 @@ const uint8_t hex_sprites[16 * 5] = {0xF0, 0x90, 0x90, 0x90, 0xF0,   // 0
                                      0xF0, 0x80, 0xF0, 0x80, 0xF0,   // E
                                      0xF0, 0x80, 0xF0, 0x80, 0x80};  // F
 
+//----------------------------------------------------------------------------//
+// Chip8:
+// Emulates the chip8 core.
+//----------------------------------------------------------------------------//
 class Chip8 {
   // CHIP8 data registers (V0..VF)
   uint8_t DATA_reg[16];
@@ -67,18 +71,78 @@ class Chip8 {
   Chip8_Input input;
 
  public:
+   //-------------------------------------------------------------------------//
+   // Chip8 ( char* chip8_program, int program_size)
+   // Constructor for the chip8 core. chip8_program is a pointer to a
+   // buffer containing the chip8 program to be run. program_size is the
+   // size in bytes of the chip8 program.
+   //-------------------------------------------------------------------------//
   Chip8(char* chip8_program, int program_size);
+  //--------------------------------------------------------------------------//
+  // ~chip8 ()
+  // Chip8 core destructor. does nothing.
+  //--------------------------------------------------------------------------//
   ~Chip8();
+  //--------------------------------------------------------------------------//
+  // void init ( char* chip8_program, int program_size )
+  // initializes the chip8 core.chip8_program is a pointer to a
+  // buffer containing the chip8 program to be run. program_size is the
+  // size in bytes of the chip8 program.
+  //--------------------------------------------------------------------------//
   void init(char* chip8_program, int program_size);
+  //--------------------------------------------------------------------------//
+  // void run_instruction ( uint16_t opcode, bool debug = false )
+  // Takes a chip8 intruction and executes it. opcode is a 16 chip8 instruction.
+  // If the debug flag is set to true, run_instruction will print the chip8
+  // instruction to the standard output.
+  //--------------------------------------------------------------------------//
   void run_instruction(uint16_t opcode, bool debug = false);
+  //--------------------------------------------------------------------------//
+  // void update ( bool debug = false )
+  // Emulates chip8 instruction cycle. Handles Keyboard input, timing,
+  // and sound. If the debug flag is set to true, run_instruction will print
+  // the chip8 instruction to the standard output.
+  //--------------------------------------------------------------------------//
   void update(bool debug = false);
+  //--------------------------------------------------------------------------//
+  // uint16_t get_PC ()
+  // getter for PC_reg.
+  //--------------------------------------------------------------------------//
   uint16_t get_PC();
+  //--------------------------------------------------------------------------//
+  // uint8_t get_mem ( uint16_t address )
+  // Returns contents of mem at address.
+  //--------------------------------------------------------------------------//
   uint8_t get_mem(uint16_t address);
+  //--------------------------------------------------------------------------//
+  // uint8_t get_V_regs ( int index )
+  // Returns the contents of DATA_reg at index.
+  //--------------------------------------------------------------------------//
   uint8_t get_V_regs(int index);
+  //--------------------------------------------------------------------------//
+  // uint8_t get_I ()
+  // Returns the contents of I_reg.
+  //--------------------------------------------------------------------------//
   uint16_t get_I();
+  //--------------------------------------------------------------------------//
+  // uint16_t get_SP ()
+  // returns the contents of SP_reg.
+  //--------------------------------------------------------------------------//
   uint16_t get_SP();
+  //--------------------------------------------------------------------------//
+  // uint8_t get_timer ()
+  // returns the contents of TIMER_reg.
+  //--------------------------------------------------------------------------//
   uint8_t get_timer();
+  //--------------------------------------------------------------------------//
+  // uint8_t get_sound ()
+  // returns the contents of SOUND_reg.
+  //--------------------------------------------------------------------------//
   uint8_t get_sound();
+  //--------------------------------------------------------------------------//
+  // void print_state ()
+  // Prints the state of the chip8 core to standard output.
+  //--------------------------------------------------------------------------//
   void print_state();
 };
 

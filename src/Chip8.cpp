@@ -6,8 +6,11 @@ Chip8::Chip8(char* chip8_program, int program_size)
 }
 
 void Chip8::init(char* chip8_program, int program_size) {
+  // Initialize RNG
   srand(time(NULL));
+  // Initialize timer.
   timer = sf::milliseconds(0);
+  // Initialize chip8 memory and registers.
   memset(mem, 0x00, MEMORY_SIZE * sizeof(char));
   memset(DATA_reg, 0x00, 16 * sizeof(uint8_t));
   I_reg = 0x0000;
@@ -15,9 +18,10 @@ void Chip8::init(char* chip8_program, int program_size) {
   SP_reg = 0x0100;
   PC_reg = 0x0200;
 
+  // Load hex_sprites and Chip8 program into Chip8 memory.
   memcpy(mem, hex_sprites, 16 * 5 * sizeof(uint8_t));
   memcpy(mem + 0x0200, chip8_program, program_size * sizeof(char));
-
+  // Initialize sound
   if(!buffer.loadFromFile("assets/213795__austin1234575__beep-1-sec.wav")) {
     std::cerr<< "Could not open sound file!\n";
     std::exit(-1);
@@ -29,6 +33,7 @@ void Chip8::init(char* chip8_program, int program_size) {
 Chip8::~Chip8() {}
 
 void Chip8::run_instruction(uint16_t opcode, bool debug) {
+  // Temp var for PC.
   uint16_t PC_dest = 0;
 
   if ((opcode & 0xF000) == 0x0000 && (opcode != 0x00E0) &&
@@ -51,8 +56,9 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if (opcode == 0x00EE) {  // RET - Return from subroutine
-
+    // zero PC_reg
     PC_reg = 0x0000;
+    // load address off the stack.
     PC_reg |= (mem[SP_reg]) << 8;
     SP_reg--;
     PC_reg |= (mem[SP_reg]);
@@ -70,7 +76,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
       std::cout << std::setbase(16) << ": JP " << addr << std::endl;
     }
   } else if ((opcode & 0xF000) == 0x2000) {  // CALL addr - Call subroutine
-
+    // Load the address in PC_reg onto the stack.
     SP_reg++;
     mem[SP_reg] = PC_reg;
     SP_reg++;
@@ -83,7 +89,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF000) == 0x3000) {  // SE Vx, byte - Skip net if Vx=b
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content = DATA_reg[reg_index];
     uint8_t op_byte = (opcode & 0x00FF);
@@ -97,7 +103,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
   } else if ((opcode & 0xF000) ==
              0x4000) {  // SNE Vx, byte - Skip next if Vx!=b
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content = DATA_reg[reg_index];
     uint8_t op_byte = (opcode & 0x00FF);
@@ -111,7 +117,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF000) == 0x5000) {  // SE Vx, Vy - Skip next if Vx=Vy
-
+    // find register index in opcode.
     uint16_t reg_index_x = (opcode & 0x0F00) >> 8;
     uint8_t reg_content_x = DATA_reg[reg_index_x];
     uint16_t reg_index_y = (opcode & 0x00F0) >> 4;
@@ -127,7 +133,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF000) == 0x6000) {  // LD Vx, byte - Set Vx = byte
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t byte = opcode & 0x00FF;
     DATA_reg[reg_index] = byte;
@@ -138,7 +144,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF000) == 0x7000) {  // ADD Vx, byte - Vx = Vx+byte
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t byte = opcode & 0x00FF;
     DATA_reg[reg_index] = DATA_reg[reg_index] + byte;
@@ -148,7 +154,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << (int)byte << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8000) {  // LD Vx, Vy - Set Vx=Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -160,7 +166,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF00F) == 0x8001) {  // OR Vx, Vy - Set Vx= Vx OR Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -171,7 +177,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8002) {  // AND Vx, Vy - Set Vx= Vx AND Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -182,7 +188,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8003) {  // XOR Vx, Vy - Set Vx= Vx XOR Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -194,7 +200,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
 
   } else if ((opcode & 0xF00F) == 0x8004) {  // ADD Vx, Vy - Set Vx= Vx + Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -211,7 +217,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8005) {  // SUB Vx, Vy - Set Vx= Vx - Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -229,7 +235,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8006) {  // SHR Vx, Vy - Vx>>1
-
+    // find register index in opcode.
     uint8_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content_x = DATA_reg[reg_index];
     if (reg_content_x & 0x01) {
@@ -245,7 +251,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x8007) {  // SUBN Vx, Vy - Vx = Vx - Vy
-
+    // find register index in opcode.
     uint8_t reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_content_y = DATA_reg[reg_index];
     reg_index = (opcode & 0x0F00) >> 8;
@@ -263,7 +269,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF00F) == 0x800E) {  // SHR Vx, Vy - Vx = Vx<<1
-
+    // find register index in opcode.
     uint8_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content_x = DATA_reg[reg_index];
     if (reg_content_x & 0x01) {
@@ -279,7 +285,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
   } else if ((opcode & 0xF000) == 0x9000) {  // SNE Vx, Vy - Skip next if Vx!=Vy
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content_x = DATA_reg[reg_index];
     reg_index = (opcode & 0x00F0) >> 4;
@@ -312,7 +318,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
   } else if ((opcode & 0xF000) ==
              0xC000) {  // RND Vx, byte - set Vx=random AND b
-
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     DATA_reg[reg_index] = (rand() % 256) & (opcode & 0x00FF);
 
@@ -322,14 +328,18 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
   } else if ((opcode & 0xF000) == 0xD000) {  // DRW Vx, Vy, nibble
     bool is_collision = false;
+    // find register index in opcode.
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_value_x = DATA_reg[reg_index];
     reg_index = (opcode & 0x00F0) >> 4;
     uint8_t reg_value_y = DATA_reg[reg_index];
+    // find sprite index in opcode
     uint8_t sprite_index = (opcode & 0x000F);
+    // temp index in case sprite is drawn off the screen in the y direction.
     int rollover_index = 0;
-
+    // loop through each sprite byte and draw.
     for (int i = 0; i < sprite_index; i++) {
+      // If the y index is off the screen draw it at the top of the screen.
       if (reg_value_y + i >= SCREEN_HEIGHT) {
         if (screen.draw_byte(mem[I_reg + i], reg_value_x, rollover_index)) {
           is_collision = true;
@@ -340,6 +350,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
         is_collision = true;
       }
     }
+    // If the sprite collides with another sprite Vf is set to 1.
     if (is_collision) {
       DATA_reg[15] = 0x01;
     }
@@ -494,7 +505,7 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
 // updates state of Chip8 core
 void Chip8::update(bool debug) {
   sf::Event event;
-
+  // Input checking.
   while (screen.get_window().pollEvent(event)) {
     if (event.type == sf::Event::KeyPressed ||
         event.type == sf::Event::KeyReleased) {
@@ -505,18 +516,19 @@ void Chip8::update(bool debug) {
       exit(0);
     }
   }
-
+  // Get the opcode from chip8 memory.
   uint16_t opcode = 0x00;
   opcode = mem[PC_reg];
   opcode = opcode << 8 | mem[PC_reg + 1];
 
+  // debugger info
   if (debug) {
     std::cout << "Insruction@Address->0x" << std::setbase(16) << PC_reg << ": ";
   }
 
-  // Time instruction
+  // Initialize clock.
   sf::Clock clock;
-
+  // Start timing cycle
   sf::Time begin = clock.getElapsedTime();
 
   run_instruction(opcode, debug);
@@ -528,6 +540,7 @@ void Chip8::update(bool debug) {
 
 
   // if timer is 1/60 of a second then update the sound and timer registers
+  // TODO: actually update at a 60hz.
   if (timer.asMicroseconds() > 80) {
     if (TIMER_reg > 0) {
       TIMER_reg--;
@@ -544,14 +557,8 @@ void Chip8::update(bool debug) {
     }
     timer = sf::Time::Zero;
   }
-
+  // Draw screen.
   screen.show_screen();
-//
-//   for (int i = 0; i < 16; i++) {
-//     if (input.is_key_pressed(i)) {
-//       std::cout << "key " << std::setbase(16) << i << " has been pressed!\n";
-//     }
-//   }
   }
 
 uint16_t Chip8::get_PC() { return PC_reg; }
