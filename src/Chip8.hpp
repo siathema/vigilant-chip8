@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
 #include "Screen.hpp"
 #include "Chip8_Input.hpp"
 
@@ -53,6 +54,11 @@ class Chip8 {
 
   // Timer
   sf::Time timer;
+
+  // Sound
+  sf::SoundBuffer buffer;
+  sf::Sound sound;
+  bool is_playing = false;
 
   // Screen
   Screen screen;

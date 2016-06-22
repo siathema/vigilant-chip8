@@ -17,6 +17,13 @@ void Chip8::init(char* chip8_program, int program_size) {
 
   memcpy(mem, hex_sprites, 16 * 5 * sizeof(uint8_t));
   memcpy(mem + 0x0200, chip8_program, program_size * sizeof(char));
+
+  if(!buffer.loadFromFile("assets/213795__austin1234575__beep-1-sec.wav")) {
+    std::cerr<< "Could not open sound file!\n";
+    std::exit(-1);
+  }
+  sound.setBuffer(buffer);
+  sound.setLoop(true);
 }
 
 Chip8::~Chip8() {}
@@ -377,13 +384,18 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
     }
   } else if ((opcode & 0xF0FF) ==
              0xF00A) {  // LD Vx, K - wait for key, set in Vx
-    bool cont = false;
-
+    bool key_is_not_pressed = true;
     // Get value stored in Vx
     uint16_t reg_index = (opcode & 0x0F00) >> 8;
 
-    while (cont) {
-      cont = input.is_key_pressed(DATA_reg[reg_index]);
+    while ( key_is_not_pressed ) {
+      input.update_keys();
+      for( uint8_t i=0; i<16; i++ ) {
+        if(input.is_key_pressed(i)) {
+          DATA_reg[reg_index] = i;
+          key_is_not_pressed = false;
+        }
+      }
     }
 
     if (debug == true) {
@@ -522,6 +534,13 @@ void Chip8::update(bool debug) {
     }
     if (SOUND_reg > 0) {
       SOUND_reg--;
+      if ( !is_playing ) {
+        sound.play();
+        is_playing = true;
+      }
+    } else {
+      sound.pause();
+      is_playing = false;
     }
     timer = sf::Time::Zero;
   }

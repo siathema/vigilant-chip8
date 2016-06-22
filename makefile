@@ -8,7 +8,7 @@ SOURCES := \
 	src/Chip8_Input.cpp \
 	src/debugger/Debugger.cpp
 
-LIBS=-lsfml-graphics -lsfml-window -lsfml-system
+LIBS=-lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=Vigilant-chip8
 
