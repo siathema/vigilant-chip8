@@ -511,7 +511,8 @@ void Chip8::update(bool debug) {
         event.type == sf::Event::KeyReleased) {
       input.update_keys();
     }
-    if (event.type == sf::Event::Closed) {
+    if (event.type == sf::Event::Closed ||
+          sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
       screen.get_window().close();
       exit(0);
     }
