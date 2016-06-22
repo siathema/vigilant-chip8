@@ -557,7 +557,7 @@ void Chip8::update(bool debug) {
     }
     timer = sf::Time::Zero;
   }
-  // Draw screen.
+  // Draw.
   screen.show_screen();
   }
 ////////////////////////////////////////////////////////////////////////////////
