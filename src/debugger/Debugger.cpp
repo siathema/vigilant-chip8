@@ -19,6 +19,22 @@ void Debugger::parse_line(Chip8 &cpu) {
       (line.compare("") == 0 && last_command == STEP)) {
     cpu.update(true);
     last_command = STEP;
+  } else if (line.compare(0, 5, "step ", 5) == 0) {
+    line = line.substr(5, line.size());
+    int count = std::stoi(line);
+    for (int i = 0; i < count; i++)
+    {
+        cpu.update(true);
+    }
+    last_command = STEP;
+  } else if (line.compare(0, 2, "s ", 2) == 0) {
+    line = line.substr(2, line.size());
+    int count = std::stoi(line);
+    for (int i = 0; i < count; i++)
+    {
+        cpu.update(true);
+    }
+    last_command = STEP;
   } else if (line.compare("exit") == 0 || last_command == EXIT) {
     std::cout << "leaving Emulator at: " << std::setbase(16) << cpu.get_PC()
               << std::endl;

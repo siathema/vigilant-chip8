@@ -11,6 +11,7 @@ Simple chip8 emulator in c++
 ```
 ### Debugger commands
 - ``` step ```, ``` s ``` - Steps through one instruction cycle
+- ``` step n```, ``` s n``` - Steps through ```n``` instruction cycles
 - ``` print [memory address] ``` - prints value in memory at address
 - ``` print V(register index) ``` - prints V registers at index
 - ``` print I ``` - prints I register
