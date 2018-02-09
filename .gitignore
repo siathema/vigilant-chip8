@@ -4,3 +4,7 @@
 Vigilant-chip8
 *.o
 *.gch
+GPATH
+GRTAGS
+GTAGS
+roms

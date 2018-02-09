@@ -268,11 +268,11 @@ void Chip8::run_instruction(uint16_t opcode, bool debug) {
       std::cout << std::setbase(16) << ": SUBN " << reg_index << ", "
                 << ((opcode & 0x00F0) >> 4) << std::endl;
     }
-  } else if ((opcode & 0xF00F) == 0x800E) {  // SHR Vx, Vy - Vx = Vx<<1
+  } else if ((opcode & 0xF00F) == 0x800E) {  // SHL Vx, Vy - Vx = Vx<<1
     // find register index in opcode.
     uint8_t reg_index = (opcode & 0x0F00) >> 8;
     uint8_t reg_content_x = DATA_reg[reg_index];
-    if (reg_content_x & 0x01) {
+    if (reg_content_x & 0x80) {
       DATA_reg[15] = 1;
     } else {
       DATA_reg[15] = 0;
