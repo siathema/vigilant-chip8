@@ -26,5 +26,5 @@ Simple chip8 emulator in c++
 ![Preview](http://i.imgur.com/qv9BhMa.png "Space Invaders!")
 ![Preview](http://i.imgur.com/l9u89xx.png "C8")
 
-# Dependencies
+## Dependencies
 * must have sfml 2.3 installed
